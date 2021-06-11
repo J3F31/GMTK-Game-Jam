@@ -10,7 +10,7 @@
 /[Ll]ogs/
 /[Mm]emoryCaptures/
 
-# Asset meta data should only be ignored when the corresponding asset is also ignored
+# Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
@@ -58,3 +58,13 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+/Assets/FMODStudioCache.asset
+/Assets/FMODStudioCache.asset.meta
+fmod.log
+fmod_editor.log
+Assets/Plugins/FMOD/Cache/Editor/FMODStudioCache.asset
+Assets/Plugins/FMOD/Cache/Editor/FMODStudioCache.asset.meta
+Assets/Plugins/FMOD/*.meta
+Assets/Plugins/FMOD/**/*.meta
+Assets/Animation.meta
+Assets/Animation.meta

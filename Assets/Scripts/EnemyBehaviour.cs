@@ -5,6 +5,7 @@ using UnityEngine;
 public class EnemyBehaviour : MonoBehaviour
 {
     [Header("Movement variables")]
+    public float rotationSpeed;
     private bool goingUp;
     private float time;
     private bool patroling = true;
@@ -18,6 +19,7 @@ public class EnemyBehaviour : MonoBehaviour
     private MoveBack player2;
     private MoveFront player1;
     private Quaternion targetRotation;
+    //private Vector3 targetDirection;
     public GameObject playerInSight = null;
 
     [Header("State variables")]
@@ -64,11 +66,11 @@ public class EnemyBehaviour : MonoBehaviour
             {
                 if (goingUp)
                 {
-                    transform.Rotate(new Vector3(0, 0.3f, 0));
+                    transform.Rotate(new Vector3(0, rotationSpeed, 0));
                 }
                 else
                 {
-                    transform.Rotate(new Vector3(0, -0.3f, 0));
+                    transform.Rotate(new Vector3(0, -rotationSpeed, 0));
                 }
             }
         }
@@ -76,6 +78,10 @@ public class EnemyBehaviour : MonoBehaviour
         //detect if players are seen
         for (int i = 0; i < rayCount; i++)
         {
+            //targetDirection = new Vector3(transform.forward.x + i * rayStep, (transform.position.y - player1.transform.position.y) * transform.forward.y, (transform.position.z - player1.transform.position.z) * transform.forward.z);
+
+            //Debug.Log(targetDirection);
+
             Physics.Raycast(transform.position, -new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), out RaycastHit hit1, Mathf.Infinity);
             Debug.DrawRay(transform.position, 100f * -new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), Color.magenta);
 

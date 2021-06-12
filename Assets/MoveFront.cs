@@ -32,7 +32,7 @@ public class MoveFront : MonoBehaviour
             pos.x = velocity * speed;
             this.transform.position += pos;
 
-            if (Input.GetKeyDown("up") && isGrounded || Input.GetKeyDown("w") && isGrounded)
+            if (Input.GetKeyDown("up") && isGrounded)
             {
                 rb.AddForce(jumpHeight * Vector3.up, ForceMode.Impulse);
             }

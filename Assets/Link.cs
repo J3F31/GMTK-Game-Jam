@@ -23,9 +23,10 @@ public class Link : MonoBehaviour
         link = GetComponent<LineRenderer>();
         player1 = FindObjectOfType<MoveFront>().gameObject.transform;
         player2 = FindObjectOfType<MoveBack>().gameObject.transform;
+
+        
     }
 
-    // Update is called once per frame
     void Update()
     {
         link.SetPosition(0, player1.position);

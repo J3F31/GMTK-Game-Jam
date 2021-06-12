@@ -6,6 +6,7 @@ public class EnemyBehaviour : MonoBehaviour
 {
     [Header("Movement variables")]
     private bool goingUp;
+    float time = 3f; //2
 
     [Header("Sight variables")]
     public float boxCastHalfExtents;
@@ -13,24 +14,24 @@ public class EnemyBehaviour : MonoBehaviour
     public float rayStep;
 
     private void Start()
-    {
-        //StartCoroutine(Hover());
+    {        
+        StartCoroutine(Hover());
     }
 
     private void Update()
     {
-        //transform.Rotate(new Vector3(0, 0.3f, 0));
+        
 
-        //if (goingUp)
-        //{
-        //    transform.Translate(Vector3.up * Time.deltaTime);
-        //}
-        //else
-        //{
-        //    transform.Translate(Vector3.down * Time.deltaTime);
-        //}
-
-        Debug.DrawRay(transform.position, 50f * -transform.forward, Color.green);
+        if (goingUp)
+        {
+            transform.Translate(Vector3.up * Time.deltaTime);
+            //transform.Rotate(new Vector3(0, 0.3f, 0));
+        }
+        else
+        {
+            transform.Translate(Vector3.down * Time.deltaTime);
+            //transform.Rotate(new Vector3(0, -0.3f, 0));
+        }
 
         for (int i = 0; i < rayCount; i++)
         {
@@ -40,23 +41,25 @@ public class EnemyBehaviour : MonoBehaviour
             Physics.Raycast(transform.position, -new Vector3(transform.forward.x - i * rayStep, transform.forward.y, transform.forward.z), out RaycastHit hit2, Mathf.Infinity);
             Debug.DrawRay(transform.position, 100f * -new Vector3(transform.forward.x - i * rayStep, transform.forward.y, transform.forward.z), Color.magenta);
 
-            if (hit1.collider.GetComponent<MoveFront>() || hit2.collider.GetComponent<MoveFront>())
+
+            if (hit1.collider || hit2.collider)
             {
-                Debug.Log("hit");
-            }
-            if (hit1.collider.GetComponent<MoveBack>() || hit2.collider.GetComponent<MoveBack>())
-            {
-                Debug.Log("hit");
-            }
+                if ((hit1.collider.name == "Player1" || hit1.collider.name == "Player2" || hit2.collider.name == "Player1" || hit2.collider.name == "Player2"))
+                {
+                    Debug.Log("Game Over");
+                    //slow time until stopped, fade game to end, restart game
+                }
+            }           
         }
     }
 
     IEnumerator Hover()
     {
         goingUp = true;
-        yield return new WaitForSeconds(.5f);
+        yield return new WaitForSeconds(time);
         goingUp = false;
-        yield return new WaitForSeconds(.5f);
+        //time = 3.5f;
+        yield return new WaitForSeconds(time);
         StartCoroutine(Hover());
     }
 }

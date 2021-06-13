@@ -10,6 +10,8 @@ public class Link : MonoBehaviour
     private LineRenderer link;
     private Transform player1;
     private Transform player2;
+    public Material linkDef;
+    public Material linkStretch;
 
     [Header("Constraint variables")]
     public float distance;
@@ -27,8 +29,8 @@ public class Link : MonoBehaviour
 
     void Update()
     {
-        link.SetPosition(0, new Vector3(player1.position.x, 0.1f, player1.position.z));
-        link.SetPosition(1, new Vector3(player2.position.x, 0.1f, player2.position.z));
+        link.SetPosition(0, player1.position);
+        link.SetPosition(1, player2.position);
 
         distance = Mathf.Abs((player1.position - player2.position).magnitude);
         dir = (turnManager.currentTurnGuy.transform.position - turnManager.currentIdleGuy.transform.position).normalized;
@@ -37,10 +39,12 @@ public class Link : MonoBehaviour
         {           
             stopWall.transform.position = new Vector3(dir.x * turnManager.currentTurnGuy.GetComponent<Collider>().bounds.extents.x + turnManager.currentTurnGuy.transform.position.x, 0, turnManager.currentTurnGuy.transform.position.z);
             stopWall.SetActive(true);
+            link.material = linkStretch;
         }
         else
         {
             stopWall.SetActive(false);
+            link.material = linkDef;
         }
     }
 }

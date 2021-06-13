@@ -53,7 +53,7 @@ public class MoveFront : MonoBehaviour
                 animatorPlayer1.SetBool("Walking1", true);
             }
 
-            if (rb.velocity.y == 0)
+            if (rb.velocity.y < .5f)
             {
                 animatorPlayer1.SetBool("Jumping1", false);
             }

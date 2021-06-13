@@ -32,7 +32,6 @@ public class EnemyBehaviour : MonoBehaviour
     public bool shouldPatrol;
 
     public Animator animatorEnemy;
-    private bool GameOver = false;
     
     void Start()
     {
@@ -41,7 +40,7 @@ public class EnemyBehaviour : MonoBehaviour
 
         if (shouldRotate)
         {
-            this.time = 2f;
+            this.time = 5f;
         }
 
         if (shouldHover)
@@ -61,15 +60,16 @@ public class EnemyBehaviour : MonoBehaviour
     {
         if (shouldPatrol)
         {
+            animatorEnemy.SetBool("IsWalking", true);
             //look if players are in sight area        
-            Physics.Raycast(transform.position, -(transform.position - player1.transform.position).normalized, out RaycastHit hit3, Mathf.Infinity);
-            Debug.DrawRay(transform.position, 100f * -(transform.position - player1.transform.position).normalized, Color.blue);
-            Physics.Raycast(transform.position, -(transform.position - player2.transform.position).normalized, out RaycastHit hit4, Mathf.Infinity);
-            Debug.DrawRay(transform.position, 100f * -(transform.position - player2.transform.position).normalized, Color.blue);
+            Physics.Raycast(transform.position + new Vector3(0, .5f, 0), -(transform.position - player1.transform.position).normalized, out RaycastHit hit3, 8f);
+            Debug.DrawRay(transform.position + new Vector3(0, .5f, 0), 8f * -(transform.position - player1.transform.position).normalized, Color.blue);
+            Physics.Raycast(transform.position + new Vector3(0, .5f, 0), -(transform.position - player2.transform.position).normalized, out RaycastHit hit4, 8f);
+            Debug.DrawRay(transform.position + new Vector3(0, .5f, 0), 8f * -(transform.position - player2.transform.position).normalized, Color.blue);
 
             if (hit3.collider.name == "Player1")
             {
-                patroling = false;
+                patroling = true;
                 playerInSight = hit3.collider.gameObject;
                 
                 targetRotation = Vector3.Angle(transform.forward,player1.transform.position - transform.position);                
@@ -82,7 +82,7 @@ public class EnemyBehaviour : MonoBehaviour
             }
             else if (hit4.collider.name == "Player2")
             {
-                patroling = false;
+                patroling = true;
                 playerInSight = hit4.collider.gameObject;
 
                 targetRotation = Vector3.Angle(transform.forward,player1.transform.position - transform.position);                
@@ -96,8 +96,63 @@ public class EnemyBehaviour : MonoBehaviour
             {
                 patroling = true;
                 playerInSight = null;
-                targetRotation = 0;
-                animatorEnemy.SetBool("IsWalking", true);
+                targetRotation = 0;                
+            }
+
+            //detect if players are seen
+            for (int i = 0; i < rayCount; i++)
+            {
+                //targetDirection = new Vector3(transform.forward.x + i * rayStep, (transform.position.y - player1.transform.position.y) * transform.forward.y, (transform.position.z - player1.transform.position.z) * transform.forward.z);
+
+                Physics.Raycast(new Vector3(transform.position.x, transform.position.y + .5f, transform.position.z), -new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), out RaycastHit hit1, Mathf.Infinity);
+                Debug.DrawRay(new Vector3(transform.position.x, transform.position.y + .5f, transform.position.z), 100f * new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), Color.magenta);
+
+                Physics.Raycast(new Vector3(transform.position.x, transform.position.y + .5f, transform.position.z), -new Vector3(transform.forward.x - i * rayStep, transform.forward.y, transform.forward.z), out RaycastHit hit2, Mathf.Infinity);
+                Debug.DrawRay(new Vector3(transform.position.x, transform.position.y + .5f, transform.position.z), 100f * new Vector3(transform.forward.x - i * rayStep, transform.forward.y, transform.forward.z), Color.magenta);
+
+                if ((hit1.collider.name == "Player1" || hit1.collider.name == "Player2" || hit2.collider.name == "Player1" || hit2.collider.name == "Player2"))
+                {
+                    GameObject.Find("Directional Light").GetComponent<Light>().color = Color.red;
+                    if (Time.timeScale > .1f)
+                    {
+                        Time.timeScale -= .1f;
+                    }
+                    StartCoroutine(EndGame());
+                }
+            }
+        }
+
+        if (shouldRotate)
+        {
+            //detect if players are seen
+            for (int i = 0; i < rayCount; i++)
+            {
+                //targetDirection = new Vector3(transform.forward.x + i * rayStep, (transform.position.y - player1.transform.position.y) * transform.forward.y, (transform.position.z - player1.transform.position.z) * transform.forward.z);
+
+                Physics.Raycast(new Vector3(transform.position.x, transform.position.y + .5f, transform.position.z), -new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), out RaycastHit hit1, 100f);
+                Debug.DrawRay(new Vector3(transform.position.x, transform.position.y + .5f, transform.position.z), 100f * new Vector3(transform.forward.x + i * rayStep, transform.forward.y - 1f, transform.forward.z - 1f), Color.magenta);
+
+                Physics.Raycast(new Vector3(transform.position.x, transform.position.y + .5f, transform.position.z), -new Vector3(transform.forward.x - i * rayStep, transform.forward.y, transform.forward.z), out RaycastHit hit2, 100f);
+                Debug.DrawRay(new Vector3(transform.position.x, transform.position.y + .5f, transform.position.z), 100f * new Vector3(transform.forward.x - i * rayStep, transform.forward.y - 1f, transform.forward.z - 1f), Color.magenta);
+
+                if ((hit1.collider.name == "Player1" || hit1.collider.name == "Player2" || hit2.collider.name == "Player1" || hit2.collider.name == "Player2"))
+                {
+                    GameObject.Find("Directional Light").GetComponent<Light>().color = Color.red;
+                    if (Time.timeScale > .1f)
+                    {
+                        Time.timeScale -= .1f;
+                    }
+                    StartCoroutine(EndGame());
+                }
+            }
+
+            if (goingUp)
+            {
+                transform.Rotate(new Vector3(0, rotationSpeed * Time.deltaTime, 0));
+            }
+            else
+            {
+                transform.Rotate(new Vector3(0, - rotationSpeed * Time.deltaTime, 0));
             }
         }
         
@@ -115,18 +170,6 @@ public class EnemyBehaviour : MonoBehaviour
                 }
             }
 
-            if (shouldRotate)
-            {
-                if (goingUp)
-                {
-                    transform.Rotate(new Vector3(0, rotationSpeed, 0));
-                }
-                else
-                {
-                    transform.Rotate(new Vector3(0, -rotationSpeed, 0));
-                }
-            }
-
             if (shouldPatrol)
             {
                 transform.position = Vector3.MoveTowards(transform.position, nextPatrolPoint, patrolSpeed * Time.deltaTime);
@@ -136,45 +179,16 @@ public class EnemyBehaviour : MonoBehaviour
                 }               
             }
         }
-
-        //detect if players are seen
-        for (int i = 0; i < rayCount; i++)
-        {
-            //targetDirection = new Vector3(transform.forward.x + i * rayStep, (transform.position.y - player1.transform.position.y) * transform.forward.y, (transform.position.z - player1.transform.position.z) * transform.forward.z);
-
-            Physics.Raycast(transform.position, -new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), out RaycastHit hit1, Mathf.Infinity);
-            Debug.DrawRay(transform.position, 100f * new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), Color.magenta);
-
-            Physics.Raycast(transform.position, -new Vector3(transform.forward.x - i * rayStep, transform.forward.y, transform.forward.z), out RaycastHit hit2, Mathf.Infinity);
-            Debug.DrawRay(transform.position, 100f * new Vector3(transform.forward.x - i * rayStep, transform.forward.y, transform.forward.z), Color.magenta);
-  
-            if ((hit1.collider.name == "Player1" || hit1.collider.name == "Player2" || hit2.collider.name == "Player1" || hit2.collider.name == "Player2"))
-            {
-                //Game Over
-                GameOver = true;               
-            }                       
-        }
-
-        if (GameOver)
-        {
-            this.GetComponentInChildren<Light>().spotAngle += .1f;
-            this.GetComponentInChildren<Light>().color = Color.red;
-            if (Time.timeScale > .2f)
-            {
-                Time.timeScale -= .1f;
-            }           
-            StartCoroutine(EndGame());
-        }
     }
 
     IEnumerator Patrol()
     {
         for (int i = 0; i < patrolPoints.Length; i++)
-        {           
+        {
             nextPatrolPoint = patrolPoints[i].transform.position;
             patrolLookDir = (transform.position - nextPatrolPoint).normalized;
             yield return new WaitForSeconds(timeBetweenPatrolPoints);
-        }       
+        }
         StartCoroutine(Patrol());
     }
 
@@ -185,7 +199,7 @@ public class EnemyBehaviour : MonoBehaviour
         this.goingUp = false;
         if (shouldRotate)
         {
-            this.time = 3.5f;
+            this.time = 10f;
         }        
         yield return new WaitForSeconds(time);
         StartCoroutine(Timer());
@@ -193,8 +207,8 @@ public class EnemyBehaviour : MonoBehaviour
 
     IEnumerator EndGame()
     {
-        yield return new WaitForSeconds(1);
-        SceneManager.LoadScene("Main", LoadSceneMode.Single);
+        yield return new WaitForSeconds(.5f);
+        SceneManager.LoadScene("Models", LoadSceneMode.Single);
         Time.timeScale = 1;
     }
 }

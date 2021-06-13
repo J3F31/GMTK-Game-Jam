@@ -53,7 +53,7 @@ public class MoveBack : MonoBehaviour
                 animatorPlayer2.SetBool("Walking2", true);
             }
 
-            if (rb.velocity.y == 0)
+            if (rb.velocity.y < .5f)
             {
                 animatorPlayer2.SetBool("Jumping2", false);
             }

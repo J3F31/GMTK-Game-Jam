@@ -10,9 +10,7 @@ public class EnemyBehaviour : MonoBehaviour
     private bool goingUp;
     private float time;
     private bool patroling = true;
-    private Quaternion initialPatrolRotation;
-    private Vector3 initialPatrolPosition;
-    private PatrolBeacon[] patrolPoints;
+    public PatrolBeacon[] patrolPoints;
     public float patrolSpeed;
     private Vector3 nextPatrolPoint;
     public float timeBetweenPatrolPoints;
@@ -24,7 +22,7 @@ public class EnemyBehaviour : MonoBehaviour
     public float sightSpeed;
     private MoveBack player2;
     private MoveFront player1;
-    private Quaternion targetRotation;
+    private float targetRotation;
     //private Vector3 targetDirection;
     public GameObject playerInSight = null;
 
@@ -33,17 +31,13 @@ public class EnemyBehaviour : MonoBehaviour
     public bool shouldHover;
     public bool shouldPatrol;
 
+    public Animator animatorEnemy;
     private bool GameOver = false;
-
+    
     void Start()
     {
         player2 = FindObjectOfType<MoveBack>();
-        player1 = FindObjectOfType<MoveFront>();
-
-        initialPatrolRotation = transform.rotation;
-        initialPatrolPosition = transform.position;
-
-        patrolPoints = FindObjectsOfType<PatrolBeacon>();
+        player1 = FindObjectOfType<MoveFront>();     
 
         if (shouldRotate)
         {
@@ -65,40 +59,48 @@ public class EnemyBehaviour : MonoBehaviour
 
     void Update()
     {
-        //look if players are in sight area        
-        Physics.Raycast(transform.position, -(transform.position - player1.transform.position).normalized, out RaycastHit hit3, Mathf.Infinity);
-        Debug.DrawRay(transform.position, 100f * -(transform.position - player1.transform.position).normalized, Color.blue);
-        Physics.Raycast(transform.position, -(transform.position - player2.transform.position).normalized, out RaycastHit hit4, Mathf.Infinity);
-        Debug.DrawRay(transform.position, 100f * -(transform.position - player2.transform.position).normalized, Color.blue);
-
-        if (hit3.collider.name == "Player1")
+        if (shouldPatrol)
         {
-            patroling = false;
-            playerInSight = hit3.collider.gameObject;
-            Debug.Log(hit3.collider.name);
+            //look if players are in sight area        
+            Physics.Raycast(transform.position, -(transform.position - player1.transform.position).normalized, out RaycastHit hit3, Mathf.Infinity);
+            Debug.DrawRay(transform.position, 100f * -(transform.position - player1.transform.position).normalized, Color.blue);
+            Physics.Raycast(transform.position, -(transform.position - player2.transform.position).normalized, out RaycastHit hit4, Mathf.Infinity);
+            Debug.DrawRay(transform.position, 100f * -(transform.position - player2.transform.position).normalized, Color.blue);
 
-            float str = Mathf.Min(sightSpeed * Time.deltaTime, 1);
-            targetRotation = Quaternion.LookRotation(-playerInSight.transform.position + transform.position, -Vector3.forward);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, str);
-        }
-        else if (hit4.collider.name == "Player2")
-        {
-            patroling = false;
-            playerInSight = hit4.collider.gameObject;
-            Debug.Log(hit4.collider.name);
+            if (hit3.collider.name == "Player1")
+            {
+                patroling = false;
+                playerInSight = hit3.collider.gameObject;
+                
+                targetRotation = Vector3.Angle(transform.forward,player1.transform.position - transform.position);                
+                if (targetRotation > 1f)
+                {
+                    transform.Rotate(new Vector3(0, targetRotation * Time.deltaTime * sightSpeed, 0));
+                }
+                animatorEnemy.SetBool("IsWalking", false);
+                
+            }
+            else if (hit4.collider.name == "Player2")
+            {
+                patroling = false;
+                playerInSight = hit4.collider.gameObject;
 
-            float str = Mathf.Min(sightSpeed * Time.deltaTime, 1);
-            targetRotation = Quaternion.LookRotation(-playerInSight.transform.position + transform.position, -Vector3.forward);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, str);
+                targetRotation = Vector3.Angle(transform.forward,player1.transform.position - transform.position);                
+                if (targetRotation > 1f)
+                {
+                    transform.Rotate(new Vector3(0, targetRotation * Time.deltaTime * sightSpeed, 0));
+                }
+                animatorEnemy.SetBool("IsWalking", false);
+            }
+            else if (!patroling)
+            {
+                patroling = true;
+                playerInSight = null;
+                targetRotation = 0;
+                animatorEnemy.SetBool("IsWalking", true);
+            }
         }
-        else if (!patroling)
-        {
-            transform.rotation = initialPatrolRotation;
-            transform.position = initialPatrolPosition;
-            patroling = true;
-            playerInSight = null;
-        }
-
+        
         if (patroling)
         {
             if (shouldHover)
@@ -130,7 +132,7 @@ public class EnemyBehaviour : MonoBehaviour
                 transform.position = Vector3.MoveTowards(transform.position, nextPatrolPoint, patrolSpeed * Time.deltaTime);
                 if (transform.position != nextPatrolPoint)
                 {
-                    transform.rotation = Quaternion.LookRotation(patrolLookDir);
+                    transform.rotation = Quaternion.LookRotation(-patrolLookDir);
                 }               
             }
         }
@@ -141,10 +143,10 @@ public class EnemyBehaviour : MonoBehaviour
             //targetDirection = new Vector3(transform.forward.x + i * rayStep, (transform.position.y - player1.transform.position.y) * transform.forward.y, (transform.position.z - player1.transform.position.z) * transform.forward.z);
 
             Physics.Raycast(transform.position, -new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), out RaycastHit hit1, Mathf.Infinity);
-            Debug.DrawRay(transform.position, 100f * -new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), Color.magenta);
+            Debug.DrawRay(transform.position, 100f * new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), Color.magenta);
 
             Physics.Raycast(transform.position, -new Vector3(transform.forward.x - i * rayStep, transform.forward.y, transform.forward.z), out RaycastHit hit2, Mathf.Infinity);
-            Debug.DrawRay(transform.position, 100f * -new Vector3(transform.forward.x - i * rayStep, transform.forward.y, transform.forward.z), Color.magenta);
+            Debug.DrawRay(transform.position, 100f * new Vector3(transform.forward.x - i * rayStep, transform.forward.y, transform.forward.z), Color.magenta);
   
             if ((hit1.collider.name == "Player1" || hit1.collider.name == "Player2" || hit2.collider.name == "Player1" || hit2.collider.name == "Player2"))
             {

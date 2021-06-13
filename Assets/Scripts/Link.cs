@@ -14,7 +14,7 @@ public class Link : MonoBehaviour
     [Header("Constraint variables")]
     public float distance;
     public float maxDistance;
-    public Vector3 dir;
+    private Vector3 dir;
 
     void Start()
     {
@@ -22,15 +22,13 @@ public class Link : MonoBehaviour
         turnManager = FindObjectOfType<SwapTurn>();
         link = GetComponent<LineRenderer>();
         player1 = FindObjectOfType<MoveFront>().gameObject.transform;
-        player2 = FindObjectOfType<MoveBack>().gameObject.transform;
-
-        
+        player2 = FindObjectOfType<MoveBack>().gameObject.transform;        
     }
 
     void Update()
     {
-        link.SetPosition(0, player1.position);
-        link.SetPosition(1, player2.position);
+        link.SetPosition(0, new Vector3(player1.position.x, 0.1f, player1.position.z));
+        link.SetPosition(1, new Vector3(player2.position.x, 0.1f, player2.position.z));
 
         distance = Mathf.Abs((player1.position - player2.position).magnitude);
         dir = (turnManager.currentTurnGuy.transform.position - turnManager.currentIdleGuy.transform.position).normalized;

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class EnemyBehaviour : MonoBehaviour
 {
@@ -31,6 +32,8 @@ public class EnemyBehaviour : MonoBehaviour
     public bool shouldRotate;
     public bool shouldHover;
     public bool shouldPatrol;
+
+    private bool GameOver = false;
 
     void Start()
     {
@@ -137,8 +140,6 @@ public class EnemyBehaviour : MonoBehaviour
         {
             //targetDirection = new Vector3(transform.forward.x + i * rayStep, (transform.position.y - player1.transform.position.y) * transform.forward.y, (transform.position.z - player1.transform.position.z) * transform.forward.z);
 
-            //Debug.Log(targetDirection);
-
             Physics.Raycast(transform.position, -new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), out RaycastHit hit1, Mathf.Infinity);
             Debug.DrawRay(transform.position, 100f * -new Vector3(transform.forward.x + i * rayStep, transform.forward.y, transform.forward.z), Color.magenta);
 
@@ -147,9 +148,21 @@ public class EnemyBehaviour : MonoBehaviour
   
             if ((hit1.collider.name == "Player1" || hit1.collider.name == "Player2" || hit2.collider.name == "Player1" || hit2.collider.name == "Player2"))
             {
-                Debug.Log("Game Over");
+                //Game Over
+                GameOver = true;               
             }                       
-        }       
+        }
+
+        if (GameOver)
+        {
+            this.GetComponentInChildren<Light>().spotAngle += .1f;
+            this.GetComponentInChildren<Light>().color = Color.red;
+            if (Time.timeScale > .2f)
+            {
+                Time.timeScale -= .1f;
+            }           
+            StartCoroutine(EndGame());
+        }
     }
 
     IEnumerator Patrol()
@@ -174,5 +187,12 @@ public class EnemyBehaviour : MonoBehaviour
         }        
         yield return new WaitForSeconds(time);
         StartCoroutine(Timer());
+    }
+
+    IEnumerator EndGame()
+    {
+        yield return new WaitForSeconds(1);
+        SceneManager.LoadScene("Main", LoadSceneMode.Single);
+        Time.timeScale = 1;
     }
 }

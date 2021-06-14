@@ -59,44 +59,42 @@ public class EnemyBehaviour : MonoBehaviour
     void Update()
     {
         if (shouldPatrol)
-        {
-            animatorEnemy.SetBool("IsWalking", true);
+        {            
             //look if players are in sight area        
-            Physics.Raycast(transform.position + new Vector3(0, .5f, 0), -(transform.position - player1.transform.position).normalized, out RaycastHit hit3, 8f);
-            Debug.DrawRay(transform.position + new Vector3(0, .5f, 0), 8f * -(transform.position - player1.transform.position).normalized, Color.blue);
-            Physics.Raycast(transform.position + new Vector3(0, .5f, 0), -(transform.position - player2.transform.position).normalized, out RaycastHit hit4, 8f);
-            Debug.DrawRay(transform.position + new Vector3(0, .5f, 0), 8f * -(transform.position - player2.transform.position).normalized, Color.blue);
+            Physics.Raycast(transform.position + new Vector3(0, .5f, 0), -(transform.position - player1.transform.position).normalized, out RaycastHit hit3, 6f);
+            Debug.DrawRay(transform.position + new Vector3(0, .5f, 0), 6f * -(transform.position - player1.transform.position).normalized, Color.blue);
+            Physics.Raycast(transform.position + new Vector3(0, .5f, 0), -(transform.position - player2.transform.position).normalized, out RaycastHit hit4, 6f);
+            Debug.DrawRay(transform.position + new Vector3(0, .5f, 0), 6f * -(transform.position - player2.transform.position).normalized, Color.blue);
 
-            if (hit3.collider.name == "Player1")
+            if (hit3.collider.GetComponent<MoveFront>() || hit3.collider.GetComponent<MoveBack>())
             {
-                patroling = true;
+                patroling = false;
                 playerInSight = hit3.collider.gameObject;
                 
                 targetRotation = Vector3.Angle(transform.forward,player1.transform.position - transform.position);                
-                if (targetRotation > 1f)
-                {
-                    transform.Rotate(new Vector3(0, targetRotation * Time.deltaTime * sightSpeed, 0));
-                }
+                
+                transform.Rotate(new Vector3(0, targetRotation * Time.deltaTime * sightSpeed, 0));
+                
                 animatorEnemy.SetBool("IsWalking", false);
                 
             }
-            else if (hit4.collider.name == "Player2")
+            if (hit4.collider.GetComponent<MoveBack>() || hit4.collider.GetComponent<MoveFront>())
             {
-                patroling = true;
+                patroling = false;
                 playerInSight = hit4.collider.gameObject;
 
-                targetRotation = Vector3.Angle(transform.forward,player1.transform.position - transform.position);                
-                if (targetRotation > 1f)
-                {
-                    transform.Rotate(new Vector3(0, targetRotation * Time.deltaTime * sightSpeed, 0));
-                }
+                targetRotation = Vector3.Angle(transform.forward,player2.transform.position - transform.position);
+                
+                transform.Rotate(new Vector3(0, targetRotation * Time.deltaTime * sightSpeed, 0));
+                
                 animatorEnemy.SetBool("IsWalking", false);
             }
-            else if (!patroling)
+            if (!hit4.collider.GetComponent<MoveBack>() && !hit3.collider.GetComponent<MoveFront>())
             {
                 patroling = true;
                 playerInSight = null;
-                targetRotation = 0;                
+                targetRotation = 0;
+                animatorEnemy.SetBool("IsWalking", true);
             }
 
             //detect if players are seen

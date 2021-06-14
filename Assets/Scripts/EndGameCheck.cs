@@ -13,11 +13,7 @@ public class EndGameCheck : MonoBehaviour
         if (endGame)
         {
             image.GetComponent<Image>().color += new Color(0, 0, 0, .5f * Time.deltaTime);
-            if(image.GetComponent<Image>().color == new Color(0, 0, 0, 255))
-            {
-                Time.timeScale = 0;
-                Debug.Log("yes");
-            }
+            StartCoroutine(Quit());
         }
     }
 
@@ -27,5 +23,11 @@ public class EndGameCheck : MonoBehaviour
         {
             endGame = true;
         }
+    }
+
+    IEnumerator Quit()
+    {
+        yield return new WaitForSeconds(5);
+        Application.Quit();
     }
 }

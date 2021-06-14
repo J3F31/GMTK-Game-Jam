@@ -39,12 +39,10 @@ public class Link : MonoBehaviour
         {           
             stopWall.transform.position = new Vector3(dir.x * turnManager.currentTurnGuy.GetComponent<Collider>().bounds.extents.x + turnManager.currentTurnGuy.transform.position.x, 0, turnManager.currentTurnGuy.transform.position.z);
             stopWall.SetActive(true);
-            link.material = linkStretch;
         }
         else
         {
             stopWall.SetActive(false);
-            link.material = linkDef;
         }
     }
 }
